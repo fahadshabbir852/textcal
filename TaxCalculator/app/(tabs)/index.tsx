@@ -119,7 +119,6 @@
 // });
 
 
-import { AdMobBanner, setTestDeviceIDAsync } from "expo-ads-admob";
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
@@ -131,6 +130,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { BannerAd, BannerAdSize, TestIds, MobileAds } from 'react-native-google-mobile-ads';
 
 interface Feature {
   id: string;
@@ -164,9 +164,10 @@ const features: Feature[] = [
 export default function HomeScreen() {
   const router = useRouter();
 
-  // Mark device as test device for AdMob
   useEffect(() => {
-    setTestDeviceIDAsync("EMULATOR"); // Always use test ads in development
+    MobileAds().initialize().then(() => {
+      console.log('AdMob initialized');
+    });
   }, []);
 
   // Render each calculator card
@@ -196,12 +197,12 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 20 }}
       />
 
-      {/* Banner Ad at bottom */}
-      <AdMobBanner
-        bannerSize="fullBanner"
-        adUnitID="ca-app-pub-3940256099942544/6300978111" // TEST ID
-        servePersonalizedAds={true}
-        onDidFailToReceiveAdWithError={(err) => console.log(err)}
+      <BannerAd
+        unitId={TestIds.ADAPTIVE_BANNER}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        requestOptions={{
+          requestNonPersonalizedAdsOnly: false,
+        }}
       />
     </View>
   );

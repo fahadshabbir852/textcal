@@ -96,23 +96,32 @@
 
 
 import { Picker } from "@react-native-picker/picker";
-import { AdMobBanner, AdMobInterstitial, setTestDeviceIDAsync } from "expo-ads-admob";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { BannerAd, BannerAdSize, TestIds, InterstitialAd, AdEventType, MobileAds } from 'react-native-google-mobile-ads';
+
+const interstitial = InterstitialAd.createForAdRequest(TestIds.INTERSTITIAL);
 
 export default function RentCalculator() {
   const [entity, setEntity] = useState("company");
   const [filer, setFiler] = useState("filer");
   const [monthlyRent, setMonthlyRent] = useState("");
   const [result, setResult] = useState<any>(null);
+  const [loaded, setLoaded] = useState(false);
 
-  // Set test device for AdMob
   useEffect(() => {
-    setTestDeviceIDAsync("EMULATOR"); // ensures test ads
-    AdMobInterstitial.setAdUnitID("ca-app-pub-3940256099942544/1033173712"); // Test interstitial
+    MobileAds().initialize();
+
+    const unsubscribe = interstitial.addAdEventListener(AdEventType.LOADED, () => {
+      setLoaded(true);
+    });
+
+    interstitial.load();
+
+    return unsubscribe;
   }, []);
 
-  const calculateTax = async () => {
+  const calculateTax = () => {
     const rent = parseFloat(monthlyRent);
     if (!rent || rent <= 0) {
       setResult("Please enter valid rent.");
@@ -146,12 +155,10 @@ export default function RentCalculator() {
       netAnnual: annualRent - annualTax,
     });
 
-    // Show interstitial ad after calculation
-    try {
-      await AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true });
-      await AdMobInterstitial.showAdAsync();
-    } catch (error) {
-      console.log("Interstitial ad error:", error);
+    if (loaded) {
+      interstitial.show();
+      interstitial.load();
+      setLoaded(false);
     }
   };
 
@@ -195,14 +202,15 @@ export default function RentCalculator() {
 
       {typeof result === "string" && <Text style={styles.error}>{result}</Text>}
 
-      {/* Banner Ad at bottom */}
-      <AdMobBanner
-        bannerSize="fullBanner"
-        adUnitID="ca-app-pub-3940256099942544/6300978111" // Test banner
-        servePersonalizedAds={true}
-        onDidFailToReceiveAdWithError={(err) => console.log(err)}
-        style={{ marginTop: 20 }}
-      />
+      <View style={{ marginTop: 20, alignItems: 'center' }}>
+        <BannerAd
+          unitId={TestIds.ADAPTIVE_BANNER}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: false,
+          }}
+        />
+      </View>
     </ScrollView>
   );
 }

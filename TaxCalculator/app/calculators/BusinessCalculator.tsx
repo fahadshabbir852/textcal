@@ -113,10 +113,9 @@
 // });
 
 
-// app/calculators/BusinessCalculator.tsx
-import { AdMobBanner, setTestDeviceIDAsync } from "expo-ads-admob";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { BannerAd, BannerAdSize, TestIds, MobileAds } from 'react-native-google-mobile-ads';
 
 export default function BusinessCalculator() {
   const [yearlyIncome, setYearlyIncome] = useState("");
@@ -124,8 +123,7 @@ export default function BusinessCalculator() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Set AdMob test device ID to display test ads
-    setTestDeviceIDAsync("EMULATOR");
+    MobileAds().initialize();
   }, []);
 
   const calculateBusinessTax = () => {
@@ -178,13 +176,13 @@ export default function BusinessCalculator() {
         </View>
       )}
 
-      {/* AdMob Banner at the bottom */}
       <View style={styles.adContainer}>
-        <AdMobBanner
-          bannerSize="fullBanner"
-          adUnitID="ca-app-pub-3940256099942544/6300978111" // Test Ad Unit ID
-          servePersonalizedAds={true}
-          onDidFailToReceiveAdWithError={(err) => console.log("Ad failed:", err)}
+        <BannerAd
+          unitId={TestIds.ADAPTIVE_BANNER}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: false,
+          }}
         />
       </View>
     </ScrollView>

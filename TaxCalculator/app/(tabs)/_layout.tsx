@@ -18,7 +18,7 @@ export default function TabLayout() {
 
   if (isLoading) {
     // Show splash screen before tabs
-    return <AnimatedSplash />;
+    return <AnimatedSplash onFinish={() => setIsLoading(false)} />;
   }
 
   // Render your original Tabs after splash
